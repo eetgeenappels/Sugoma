@@ -5,9 +5,16 @@ Sugoma is a Minecraft utility mod for 1.12.2 written using Kotlin.
 ## How to contribute
 
 Setup Workspace:
-```sh
+```shell
+git clone https://github.com/eetgeenappels/Sugoma
+cd Sugoma
 ./gradlew build
 ./gradlew genIntellijRuns
+```
+
+How to build:
+```shell
+./gradlew jar
 ```
 
 ## Dependencies
