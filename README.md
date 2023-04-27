@@ -14,7 +14,7 @@ cd Sugoma
 
 How to build:
 ```shell
-./gradlew jar
+./gradlew reobfJar
 ```
 
 ## Dependencies
