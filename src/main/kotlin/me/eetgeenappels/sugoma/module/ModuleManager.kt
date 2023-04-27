@@ -32,10 +32,10 @@ class ModuleManager {
         modules.add(AutoCrystal())
         modules.add(AutoEZ())
         // world
-        modules.add(Scaffold())
+        //modules.add(Scaffold())
         // player
         modules.add(Sprint())
-        modules.add(NoFall())
+        //modules.add(NoFall())
         load()
     }
 
@@ -151,22 +151,22 @@ class ModuleManager {
             if (split[0].equals("Malware", ignoreCase = true)) continue
 
             // get module
-            val module = getModule(split[0])
+            val module: Module = getModule(split[0]) ?: continue
 
             // check if split[1] is "Toggled"
             if (split[1].equals("Toggled", ignoreCase = true)) {
-                module!!.toggled = split[2].toBoolean()
+                module.toggled = split[2].toBoolean()
                 continue
             }
 
             // check if split[1] is "Bind"
             if (split[1].equals("Bind", ignoreCase = true)) {
-                module!!.key = split[2].toInt()
+                module.key = split[2].toInt()
                 continue
             }
 
             // get setting
-            val setting = module!!.getSetting(split[1])
+            val setting = module.getSetting(split[1]) ?: continue
             // set value
             if (setting is ToggleSetting) setting.value = split[2].toBoolean()
             if (setting is SliderSetting) setting.value = split[2].toDouble().toFloat()
