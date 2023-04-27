@@ -7,7 +7,7 @@ import net.minecraft.network.play.client.CPacketPlayer
 import net.minecraftforge.common.MinecraftForge
 
 class NoFall : Module("NoFall", "You don't take fall damage", Category.Player) {
-    override fun onPacketSending(packet: Packet<*>?): Packet<*>? {
+    override fun onPacket(packet: Packet<*>): Boolean {
         class SugomaPacketPlayer : CPacketPlayer() {
             fun onGroundISTRUE(){
                 this.onGround = true
@@ -17,7 +17,7 @@ class NoFall : Module("NoFall", "You don't take fall damage", Category.Player) {
         //if (mc.player.fallDistance >= 3.0f && packet instanceof CPacketPlayer) {
         if (packet is CPacketPlayer) (packet as SugomaPacketPlayer).onGroundISTRUE()
         //}
-        return packet
+        return false
     }
 
     override fun onEnable() {

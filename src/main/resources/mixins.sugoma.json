@@ -1,0 +1,10 @@
+{
+    "required": true,
+    "minVersion": "0.7",
+    "compatibilityLevel": "JAVA_8",
+    "package": "me.eetgeenappels.sugoma.mixin",
+    "refmap": "mixins.sugoma.refmap.json",
+    "mixins": [
+        "NetworkManagerMixin"
+    ]
+}

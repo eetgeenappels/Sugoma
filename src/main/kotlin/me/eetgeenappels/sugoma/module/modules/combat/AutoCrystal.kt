@@ -1,185 +1,114 @@
 package me.eetgeenappels.sugoma.module.modules.combat
 
+import me.eetgeenappels.sugoma.Sugoma
 import me.eetgeenappels.sugoma.module.Category
 import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.module.modules.settings.ModeSetting
 import me.eetgeenappels.sugoma.module.modules.settings.SliderSetting
 import me.eetgeenappels.sugoma.module.modules.settings.ToggleSetting
+import me.eetgeenappels.sugoma.util.CombatUtil
 import net.minecraft.enchantment.EnchantmentHelper
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.SharedMonsterAttributes
-import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.item.EntityEnderCrystal
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Blocks
 import net.minecraft.init.Items
-import net.minecraft.network.play.client.CPacketPlayer
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock
 import net.minecraft.potion.Potion
 import net.minecraft.util.CombatRules
 import net.minecraft.util.DamageSource
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.EnumHand
 import net.minecraft.util.math.*
 import net.minecraft.world.Explosion
 import java.util.*
 import java.util.stream.Collectors
 
 class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end crystals ", Category.Combat) {
-    private val range: SliderSetting
-    private val reach: SliderSetting
-    private val targetingMode: ModeSetting
-    private val minDamageBreak: SliderSetting
-    private val maxSelfDamageBreak: SliderSetting
-    private val minDamagePlace: SliderSetting
-    private val maxSelfDamagePlace: SliderSetting
-    private val antiSuicide: ToggleSetting
-    private val breakDelay: SliderSetting
-    private val placeDelay: SliderSetting
-    private val multiplace: ToggleSetting
-    private val lookAtCrystal: ToggleSetting
-    private val killThatOneVeryAnnoyyingCrystalStrat: ToggleSetting
-    private var delay = 0
-    private var time = 0
+    private val range = SliderSetting("Range", 10f, 20f, 15f)
+    private val reach = SliderSetting("Reach", 3f, 5f, 3f)
+    private val targetingMode = ModeSetting("Targeting", arrayOf("Nearest", "Exposedness"))
+    private val minDamageBreak = SliderSetting("minDamageBreak", 0f, 18f, 6f)
+    private val maxSelfDamageBreak = SliderSetting("maxDamageSelfBreak", 0f, 18f, 10f)
+    private val minDamagePlace = SliderSetting("minDamagePlace", 0f, 18f, 6f)
+    private val maxSelfDamagePlace = SliderSetting("maxDamageSelfPlace", 0f, 18f, 10f)
+    private val antiSuicide = ToggleSetting("AntiSuicide", true)
+    private val breakDelay = SliderSetting("BreakDelay", 0f, 5f, 1f, 0)
+    private val placeDelay = SliderSetting("PlaceDelay", 0f, 5f, 3f, 0)
+    private val multiplace = ToggleSetting("Multiplace", false)
+    private val lookAtCrystal = ToggleSetting("LookAtCrystal", false)
+    private val killThatOneVeryAnnoyingCrystalStrat = ToggleSetting("killThatOneVeryAnnoyyingCrystalStrat", true)
+    private val targetArmorStands = ToggleSetting("TargetArmorStands", false)
+    private var placeTime = 0
+    private var breakTime = 0
 
     init {
-        range = SliderSetting("Range", 10f, 20f, 15f)
-        reach = SliderSetting("Reach", 3f, 5f, 3f)
         settings.add(range)
         settings.add(reach)
-        targetingMode = ModeSetting("Targeting", arrayOf("Nearest", "Exposedness"))
         settings.add(targetingMode)
-        minDamageBreak = SliderSetting("minDamageBreak", 0f, 18f, 6f)
-        maxSelfDamageBreak = SliderSetting("maxDamageSelfBreak", 0f, 18f, 10f)
-        minDamagePlace = SliderSetting("minDamagePlace", 0f, 18f, 6f)
-        maxSelfDamagePlace = SliderSetting("maxDamageSelfPlace", 0f, 18f, 10f)
         settings.add(minDamageBreak)
         settings.add(maxSelfDamageBreak)
         settings.add(minDamagePlace)
         settings.add(maxSelfDamagePlace)
-        antiSuicide = ToggleSetting("AntiSuicide", true)
         settings.add(antiSuicide)
-        breakDelay = SliderSetting("BreakDelay", 0f, 5f, 1f, 0)
-        placeDelay = SliderSetting("PlaceDelay", 0f, 5f, 3f, 0)
-        multiplace = ToggleSetting("Multiplace", false)
         settings.add(breakDelay)
         settings.add(placeDelay)
         settings.add(multiplace)
-        lookAtCrystal = ToggleSetting("LookAtCrystal", false)
         settings.add(lookAtCrystal)
-        killThatOneVeryAnnoyyingCrystalStrat = ToggleSetting("killThatOneVeryAnnoyyingCrystalStrat", true)
-        settings.add(killThatOneVeryAnnoyyingCrystalStrat)
+        settings.add(killThatOneVeryAnnoyingCrystalStrat)
+        settings.add(targetArmorStands)
     }
 
     override fun onTick() {
-        time += 1
-        if (time < delay) return
-        var target: Entity? = null
-        if (targetingMode.currentModeIndex == 0) {
-            // set the target to attack with crystal (Make more options in the future.)
-            target = mc.world.loadedEntityList.stream()
-                .filter { entity: Entity -> entity !== mc.player }
-                .filter { entity: Entity? -> entity is EntityPlayer || entity is EntityArmorStand }
-                .filter { entity: Entity? -> mc.player.getDistance(entity) <= range.value }
-                .filter { entity: Entity -> !entity.isDead }
-                // get enemy closest to mc.player
-                .min { o1, o2 -> o1!!.getDistance(mc.player).compareTo(o2!!.getDistance(mc.player)) }
-                .orElse(null)
+        val target: Entity = CombatUtil.findTarget(
+            targetMobs = false,
+            targetAnimals =  false,
+            targetPlayers =  true,
+            targetArmorStand = true,
+            targetSortingType = this.targetingMode.currentModeIndex,
+            reach = reach.value
+        ) ?: return
+        // add target to AutoEZ registry
+        breakTime += 1
+        if (crystalBreak(target)) {
+            breakTime = -breakDelay.value.toInt()
+            (Sugoma.moduleManager.getModule("AutoEZ")as AutoEZ).addTarget(target)
         }
-        if (targetingMode.currentModeIndex == 1) {
-            var minExposedScore = Float.POSITIVE_INFINITY
-            val targets: MutableList<Entity?> = ArrayList()
-            for (possibleTarget in mc.world.loadedEntityList.stream()
-                .filter { entity: Entity -> entity !== mc.player }
-                .filter { entity: Entity? -> entity is EntityPlayer || entity is EntityArmorStand }
-                .filter { entity: Entity? -> mc.player.getDistance(entity) <= range.value }
-                .filter { entity: Entity -> !entity.isDead }
-                .collect(Collectors.toList<Entity>())) {
-                val pos = possibleTarget.position
-                var score = 0f
-                if (mc.world.getBlockState(pos.down()).block === Blocks.OBSIDIAN ||
-                    mc.world.getBlockState(pos.down()).block === Blocks.BEDROCK
-                ) {
-                    score += 2f
-                }
-                if (mc.world.getBlockState(pos.west()).block === Blocks.OBSIDIAN ||
-                    mc.world.getBlockState(pos.west()).block === Blocks.BEDROCK
-                ) {
-                    score += 1.5.toFloat()
-                }
-                if (mc.world.getBlockState(pos.east()).block === Blocks.OBSIDIAN ||
-                    mc.world.getBlockState(pos.east()).block === Blocks.BEDROCK
-                ) {
-                    score += 1.5.toFloat()
-                }
-                if (mc.world.getBlockState(pos.north()).block === Blocks.OBSIDIAN ||
-                    mc.world.getBlockState(pos.north()).block === Blocks.BEDROCK
-                ) {
-                    score += 1.5.toFloat()
-                }
-                if (mc.world.getBlockState(pos.south()).block === Blocks.OBSIDIAN ||
-                    mc.world.getBlockState(pos.south()).block === Blocks.BEDROCK
-                ) {
-                    score += 1.5.toFloat()
-                }
-                if (score < minExposedScore) {
-                    minExposedScore = score
-                    targets.add(possibleTarget)
-                }
-                if (score == minExposedScore) {
-                    targets.add(possibleTarget)
-                }
-            }
-            target = targets.stream()
-                .min { o1, o2 -> o1!!.getDistance(mc.player).compareTo(o2!!.getDistance(mc.player)) }
-                .orElse(null)
-        }
-        if (target == null) return
-        val broken_crystal = breakCrystal(target)
-        if (!broken_crystal) {
-            var placedCrystal = false
+        placeTime += 1
+        if (crystalPlace(target)) {
+            breakTime = -breakDelay.value.toInt()
+
+            // check multiplace
             if (multiplace.value) {
-                for (i in 0..2) {
-                    placedCrystal = if (placeCrystal(target)) {
-                        true
-                    } else {
-                        break
-                    }
+                for (i in 0..1) {
+                    crystalPlace(target)
                 }
-            } else {
-                placedCrystal = placeCrystal(target)
             }
-            if (placedCrystal) {
-                time = 0
-                delay = placeDelay.value.toInt()
-            }
-        } else {
-            time = 0
-            delay = breakDelay.value.toInt()
         }
     }
 
-    fun breakCrystal(target: Entity): Boolean {
-        var target = target
-        val end_crystals = mc.world.loadedEntityList.stream()
-            .filter { entity: Entity? -> mc.player.getDistance(entity) <= reach.value }
+    private fun crystalBreak(target: Entity): Boolean {
+        // break delay
+        if (breakTime < breakDelay.value.toInt()) return false
+        val endCrystals = mc.world.loadedEntityList.stream()
+            .filter { entity: Entity? -> mc.player.getDistance(entity!!) <= reach.value }
             .filter { entity: Entity? -> entity is EntityEnderCrystal }
             .collect(Collectors.toList())
-        if (killThatOneVeryAnnoyyingCrystalStrat.value) {
-            for (crystal in end_crystals) {
+        var neoTarget : Entity = target
+        if (killThatOneVeryAnnoyingCrystalStrat.value) {
+            for (crystal in endCrystals) {
                 if (crystal.position === mc.player.position.add(Vec3i(0, 3, 0))) {
                     if (mc.world.getBlockState(mc.player.position.add(Vec3i(0, 2, 0))).block === Blocks.OBSIDIAN) {
-                        target = crystal
+                        neoTarget = crystal
                     }
                 }
             }
         }
+
         var maxDamage = -1000000.0
         var bestCrystal: Entity? = null
-        for (crystal in end_crystals) {
+        for (crystal in endCrystals) {
             val pos = crystal.position
-            val damage = calculateDamage(pos, target).toDouble()
+            val damage = calculateDamage(pos, neoTarget).toDouble()
             if (damage < minDamageBreak.value) continue
             val selfDamage = calculateDamage(pos, mc.player).toDouble()
             if (selfDamage > maxSelfDamageBreak.value) continue
@@ -190,27 +119,30 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             }
         }
         if (bestCrystal == null) return false
-        attack(bestCrystal)
+        CombatUtil.attack(bestCrystal, lookAtCrystal.value)
         return true
     }
 
-    fun placeCrystal(target: Entity): Boolean {
+    private fun crystalPlace(target: Entity): Boolean {
+
+        // place delay
+        if (placeTime < placeDelay.value.toInt()) return false
 
         // place stuff
-        var holding_crystal = false
-        var holding_in_mainHand = false
+        var holdingCrystal = false
+        var holdingInMainhand = false
 
         // Check if the player is holding end crystals in their main hand or off-hand
         if (mc.player.heldItemMainhand.item === Items.END_CRYSTAL) {
-            holding_crystal = true
-            holding_in_mainHand = true
+            holdingCrystal = true
+            holdingInMainhand = true
         }
         if (mc.player.heldItemOffhand.item === Items.END_CRYSTAL) {
-            holding_crystal = true
+            holdingCrystal = true
         }
-        if (holding_crystal) {
+        if (holdingCrystal) {
             // Get the range value
-            val range = reach.value.toInt()
+            val reach = this.reach.value.toInt()
             val possiblePositions: MutableList<BlockPos> = ArrayList()
 
             // Get the player's position
@@ -219,9 +151,9 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             val z = mc.player.posZ
 
             // Loop through all the blocks within the range
-            for (i in (x - range).toInt()..(x + range).toInt()) {
-                for (j in (y - range).toInt()..(y + range).toInt()) {
-                    for (k in (z - range).toInt()..(z + range).toInt()) {
+            for (i in (x - reach).toInt()..(x + reach).toInt()) {
+                for (j in (y - reach).toInt()..(y + reach).toInt()) {
+                    for (k in (z - reach).toInt()..(z + reach).toInt()) {
                         val pos = BlockPos(i, j, k)
                         if (canPlaceCrystal(pos)) possiblePositions.add(pos.up())
                     }
@@ -230,61 +162,16 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             if (possiblePositions.size == 0) {
                 return false
             }
-            var maxDamage = -1000000.0
-            var bestCrystalPos: BlockPos? = null
-            for (pos in possiblePositions) {
-                val damage = calculateDamage(pos, target).toDouble()
-                if (damage < minDamagePlace.value) continue
-                val selfDamage = calculateDamage(pos, mc.player).toDouble()
-                if (selfDamage > maxSelfDamagePlace.value) continue
-                if (selfDamage >= mc.player.health + mc.player.absorptionAmount && antiSuicide.value) continue
-                if (damage > maxDamage) {
-                    maxDamage = damage
-                    bestCrystalPos = pos
-                }
-            }
-            if (bestCrystalPos == null) return false
-            if (lookAtCrystal.value) {
-                val player = mc.player
 
-                // Calculate the angle between the player's position and the target block position
-                val dx = bestCrystalPos.x + 0.5 - player.posX
-                val dy = bestCrystalPos.y + 0.5 - (player.posY + player.getEyeHeight())
-                val dz = bestCrystalPos.z + 0.5 - player.posZ
-                val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-                val yaw = Math.toDegrees(Math.atan2(dz, dx)).toFloat() - 90
-                val pitch = -Math.toDegrees(Math.atan2(dy, distance)).toFloat()
+            val bestCrystalPos: BlockPos  = findBestCrystal(possiblePositions, target) ?: return false
 
-                // Send a packet to the server to update the player's rotation
-                player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
-            }
-            if (holding_in_mainHand) {
-                mc.player.connection.sendPacket(
-                    CPacketPlayerTryUseItemOnBlock(
-                        bestCrystalPos.down(),
-                        EnumFacing.UP,
-                        EnumHand.MAIN_HAND,
-                        0f,
-                        0f,
-                        0f
-                    )
-                )
-            } else {
-                mc.player.connection.sendPacket(
-                    CPacketPlayerTryUseItemOnBlock(
-                        bestCrystalPos.down(),
-                        EnumFacing.UP,
-                        EnumHand.OFF_HAND,
-                        0f,
-                        0f,
-                        0f
-                    )
-                )
-            }
+            CombatUtil.placeCrystal(bestCrystalPos,lookAtCrystal.value,holdingInMainhand)
+
             return true
         }
         return false
     }
+
 
     private fun getDamageMultiplied(damage: Float): Float {
         val diff: Float = mc.world.difficulty.id.toFloat()
@@ -296,7 +183,24 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
         })
     }
 
-    fun calculateDamage(pos: BlockPos, entity: Entity): Float {
+    private fun findBestCrystal(possiblePositions: List<BlockPos>,  target: Entity): BlockPos? {
+        var maxDamage = -1000000.0
+        var bestCrystalPos: BlockPos? = null
+        for (pos in possiblePositions) {
+            val damage = calculateDamage(pos, target).toDouble()
+            if (damage < minDamagePlace.value) continue
+            val selfDamage = calculateDamage(pos, mc.player).toDouble()
+            if (selfDamage > maxSelfDamagePlace.value) continue
+            if (selfDamage >= mc.player.health + mc.player.absorptionAmount && antiSuicide.value) continue
+            if (damage > maxDamage) {
+                maxDamage = damage
+                bestCrystalPos = pos
+            }
+        }
+        return bestCrystalPos
+    }
+
+    private fun calculateDamage(pos: BlockPos, entity: Entity): Float {
         val posX = pos.x.toDouble()
         val posY = pos.y.toDouble()
         val posZ = pos.z.toDouble()
@@ -317,23 +221,22 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
         return finalDamage.toFloat()
     }
 
-    fun getBlastReduction(entity: EntityLivingBase, damage: Float, explosion: Explosion?): Float {
+    private fun getBlastReduction(entity: EntityLivingBase, damage: Float, explosion: Explosion?): Float {
         var damage = damage
         if (entity is EntityPlayer) {
-            val ep = entity
             val ds = DamageSource.causeExplosionDamage(explosion)
             damage = CombatRules.getDamageAfterAbsorb(
                 damage,
-                ep.totalArmorValue.toFloat(),
-                ep.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).attributeValue.toFloat()
+                entity.totalArmorValue.toFloat(),
+                entity.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).attributeValue.toFloat()
             )
-            val k = EnchantmentHelper.getEnchantmentModifierDamage(ep.armorInventoryList, ds)
+            val k = EnchantmentHelper.getEnchantmentModifierDamage(entity.armorInventoryList, ds)
             val f = MathHelper.clamp(k.toFloat(), 0.0f, 20.0f)
             damage *= 1.0f - f / 25.0f
-            if (entity.isPotionActive(Objects.requireNonNull(Potion.getPotionById(11)))) {
-                damage = damage - damage / 4
+            if (Objects.requireNonNull(Potion.getPotionById(11))?.let { entity.isPotionActive(it) } == true) {
+                damage -= damage / 4
             }
-            damage = Math.max(damage, 0.0f)
+            damage = damage.coerceAtLeast(0.0f)
             return damage
         }
         damage = CombatRules.getDamageAfterAbsorb(
@@ -342,28 +245,6 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             entity.getEntityAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).attributeValue.toFloat()
         )
         return damage
-    }
-
-    fun attack(e: Entity) {
-        if (lookAtCrystal.value) {
-            val player = mc.player
-            val blockPos = e.position
-
-            // Calculate the angle between the player's position and the target block position
-            val dx = blockPos.x + 0.5 - player.posX
-            val dy = blockPos.y + 0.5 - (player.posY + player.getEyeHeight())
-            val dz = blockPos.z + 0.5 - player.posZ
-            val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-            val yaw = Math.toDegrees(Math.atan2(dz, dx)).toFloat() - 90
-            val pitch = -Math.toDegrees(Math.atan2(dy, distance)).toFloat()
-
-            // Send a packet to the server to update the player's rotation
-            player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
-        }
-        if (mc.player.getCooledAttackStrength(0f) >= 1) {
-            mc.playerController.attackEntity(mc.player, e)
-            mc.player.swingArm(EnumHand.MAIN_HAND)
-        }
     }
 
     private fun canPlaceCrystal(pos: BlockPos): Boolean {

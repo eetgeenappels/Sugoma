@@ -39,7 +39,7 @@ open class Module(var name: String, var description: String, var category: Categ
         return null
     }
 
-    open fun onPacketSending(packet: Packet<*>?): Packet<*>? {
-        return packet
+    open fun onPacket(packet: Packet<*>): Boolean{
+        return false
     }
 }

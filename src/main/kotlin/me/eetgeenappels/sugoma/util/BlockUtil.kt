@@ -1,6 +1,7 @@
 package me.eetgeenappels.sugoma.util
 
 import me.eetgeenappels.sugoma.Sugoma
+import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemBlock
@@ -12,10 +13,13 @@ import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import java.util.*
+import kotlin.math.atan2
+import kotlin.math.floor
+import kotlin.math.sqrt
 
 object BlockUtil {
     private val mc = Minecraft.getMinecraft()
-    var emptyBlocks = Arrays.asList(
+    val emptyBlocks: List<Block> = listOf(
         Blocks.AIR,
         Blocks.FLOWING_LAVA,
         Blocks.LAVA,
@@ -30,7 +34,7 @@ object BlockUtil {
     fun findNeighborBlocks(pos: BlockPos): List<Neighbour> {
         var pos = pos
         val neighbours: MutableList<Neighbour> = ArrayList()
-        pos = BlockPos(Math.floor(pos.x.toDouble()), Math.floor(pos.y.toDouble()), Math.floor(pos.z.toDouble()))
+        pos = BlockPos(floor(pos.x.toDouble()), floor(pos.y.toDouble()), floor(pos.z.toDouble()))
         if (!emptyBlocks.contains(mc.world.getBlockState(pos.down()).block)) neighbours.add(
             Neighbour(
                 pos.down(),
@@ -65,16 +69,24 @@ object BlockUtil {
 
     fun place(posI: BlockPos?, face: EnumFacing?, rotate: Boolean) {
         var pos = posI
-        if (face == EnumFacing.UP) {
-            pos = pos!!.add(0, 1, 0)
-        } else if (face == EnumFacing.NORTH) {
-            pos = pos!!.add(0, 0, -1)
-        } else if (face == EnumFacing.SOUTH) {
-            pos = pos!!.add(0, 0, 1)
-        } else if (face == EnumFacing.EAST) {
-            pos = pos!!.add(-1, 0, 0)
-        } else if (face == EnumFacing.WEST) {
-            pos = pos!!.add(1, 0, 0)
+        when (face) {
+            EnumFacing.UP -> {
+                pos = pos!!.add(0, 1, 0)
+            }
+            EnumFacing.NORTH -> {
+                pos = pos!!.add(0, 0, -1)
+            }
+            EnumFacing.SOUTH -> {
+                pos = pos!!.add(0, 0, 1)
+            }
+            EnumFacing.EAST -> {
+                pos = pos!!.add(-1, 0, 0)
+            }
+            EnumFacing.WEST -> {
+                pos = pos!!.add(1, 0, 0)
+            }
+
+            else -> {}
         }
         val oldSlot = mc.player.inventory.currentItem
         var newSlot = -1
@@ -93,7 +105,7 @@ object BlockUtil {
             return
         }
         var crouched = false
-        if (!mc.player.isSneaking && emptyBlocks.contains(mc.world.getBlockState(pos).block)) {
+        if (!mc.player.isSneaking && emptyBlocks.contains(pos?.let { mc.world.getBlockState(it).block })) {
             mc.player.connection.sendPacket(CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING))
             crouched = true
         }
@@ -114,14 +126,13 @@ object BlockUtil {
             val dx = blockPos.x + 0.5 - player.posX
             val dy = blockPos.y + 0.5 - (player.posY + player.getEyeHeight())
             val dz = blockPos.z + 0.5 - player.posZ
-            val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-            val yaw = Math.toDegrees(Math.atan2(dz, dx)).toFloat() - 90
-            val pitch = -Math.toDegrees(Math.atan2(dy, distance)).toFloat()
-
+            val distance = sqrt(dx * dx + dy * dy + dz * dz)
+            val yaw = Math.toDegrees(atan2(dz, dx)).toFloat() - 90
+            val pitch = -Math.toDegrees(atan2(dy, distance)).toFloat()
             // Send a packet to the server to update the player's rotation
             player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
         }
-        Sugoma.Companion.logger.info("Block Position x: " + pos!!.x + " y: " + pos.y + " z: " + pos.z + " face: " + face!!.getName())
+        Sugoma.logger.info("Block Position x: " + pos!!.x + " y: " + pos.y + " z: " + pos.z + " face: " + face!!.getName())
         mc.playerController.processRightClickBlock(
             mc.player,
             mc.world,

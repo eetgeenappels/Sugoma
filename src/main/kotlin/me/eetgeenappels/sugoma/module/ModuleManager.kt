@@ -1,11 +1,13 @@
 package me.eetgeenappels.sugoma.module
 
 import me.eetgeenappels.sugoma.module.modules.combat.AutoCrystal
+import me.eetgeenappels.sugoma.module.modules.combat.AutoEZ
 import me.eetgeenappels.sugoma.module.modules.combat.AutoTotem
 import me.eetgeenappels.sugoma.module.modules.combat.KillAura
 import me.eetgeenappels.sugoma.module.modules.player.NoFall
 import me.eetgeenappels.sugoma.module.modules.player.Sprint
 import me.eetgeenappels.sugoma.module.modules.render.ClickGuiModule
+import me.eetgeenappels.sugoma.module.modules.render.Fulbright
 import me.eetgeenappels.sugoma.module.modules.settings.ModeSetting
 import me.eetgeenappels.sugoma.module.modules.settings.SliderSetting
 import me.eetgeenappels.sugoma.module.modules.settings.ToggleSetting
@@ -23,10 +25,12 @@ class ModuleManager {
 
         // render
         modules.add(ClickGuiModule())
+        modules.add(Fulbright())
         // combat
         modules.add(KillAura())
         modules.add(AutoTotem())
         modules.add(AutoCrystal())
+        modules.add(AutoEZ())
         // world
         modules.add(Scaffold())
         // player

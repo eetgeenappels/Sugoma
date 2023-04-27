@@ -1,5 +1,8 @@
 import net.minecraftforge.gradle.userdev.UserDevExtension
 import org.gradle.jvm.tasks.Jar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.spongepowered.asm.gradle.plugins.MixinExtension
+import org.spongepowered.asm.gradle.plugins.MixinGradlePlugin
 
 // gradle.properties
 val modGroup: String by extra
@@ -13,12 +16,15 @@ buildscript {
         mavenCentral()
         maven(url = "https://maven.minecraftforge.net/")
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
+        maven(url = "https://repo.spongepowered.org/repository/maven-public/")
+
     }
     dependencies {
         classpath("net.minecraftforge.gradle:ForgeGradle:4.1.+") {
             isChanging = true
         }
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50")
+        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
     }
 }
 
@@ -30,6 +36,7 @@ plugins {
 apply {
     plugin("net.minecraftforge.gradle")
     plugin("kotlin")
+    plugin("org.spongepowered.mixin")
 }
 
 version = modVersion
@@ -76,12 +83,17 @@ repositories {
     jcenter()
     mavenCentral()
     maven(url = "http://maven.shadowfacts.net/")
+    maven(
+        url = "https://repo.spongepowered.org/repository/maven-public/"
+    )
 }
 
 dependencies {
     "minecraft"("net.minecraftforge:forge:1.12.2-14.23.5.2860")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50")
     implementation("net.shadowfacts:Forgelin:1.8.4")
+    implementation("org.spongepowered:mixin:0.7-SNAPSHOT")
+    annotationProcessor("org.spongepowered:mixin:0.8.2:processor")
 }
 
 // processResources
@@ -110,3 +122,10 @@ tasks.create("copyResourceToClasses", Copy::class) {
     into("$buildDir/classes/kotlin/main")
     from(tasks.processResources.get().destinationDir)
 }
+
+configure<MixinExtension> {
+    add(sourceSets.main.get(), "mixins.sugoma.refmap.json")
+    //disableAnnotationProcessorCheck()
+}
+
+

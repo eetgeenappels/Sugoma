@@ -6,6 +6,7 @@ import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.module.modules.render.ClickGuiModule
 import me.eetgeenappels.sugoma.util.Reference
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
@@ -89,7 +90,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             width = viewWidth
             moduleViews = ArrayList()
             var y = (1 + fr.FONT_HEIGHT) * 2
-            for (module in Sugoma.Companion.moduleManager!!.getModulesByCategory(
+            for (module in Sugoma.moduleManager.getModulesByCategory(
                 category
             )) {
                 moduleViews.add(ModuleView(module, offsetX, offsetY + y))
@@ -127,8 +128,8 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             y += fr.FONT_HEIGHT + 1
 
             // draw modules and settings
-            for (i in Sugoma.Companion.moduleManager!!.getModulesByCategory(category).indices) {
-                val module: Module = Sugoma.Companion.moduleManager!!.getModulesByCategory(
+            for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
+                val module: Module = Sugoma.moduleManager.getModulesByCategory(
                     category
                 ).get(i)
                 if (module.name.equals("ClickGui", ignoreCase = true)) continue
@@ -147,9 +148,10 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
         }
 
         // calculates the height of the view (useful for drawing the original rectangles)
-        fun calculateHeight() {
+        private fun calculateHeight() {
             var y = 1 + fr.FONT_HEIGHT
-            for (i in Sugoma.Companion.moduleManager!!.getModulesByCategory(category).indices) {
+            for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
+                if (Sugoma.moduleManager.getModulesByCategory(category)[i].name == "ClickGui")
                 moduleViews[i].offsetX = offsetX
                 moduleViews[i].offsetY = offsetY + y + fr.FONT_HEIGHT
                 y += fr.FONT_HEIGHT + 1
@@ -168,9 +170,9 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
                         grappled = true
                         return
                     }
-                    for (i in Sugoma.Companion.moduleManager!!.getModulesByCategory(category).indices) {
+                    for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                         if (offsetY + y < mouseY && mouseY < offsetY + y + fr.FONT_HEIGHT + 1) {
-                            Sugoma.Companion.moduleManager!!.getModulesByCategory(category).get(i).toggle()
+                            Sugoma.moduleManager.getModulesByCategory(category).get(i).toggle()
                             return
                         }
                         y += fr.FONT_HEIGHT + 1
@@ -181,7 +183,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             if (mouseButton == 1) {
                 if (offsetX < mouseX && mouseX < offsetX + width) {
                     var y = fr.FONT_HEIGHT + 1
-                    for (i in Sugoma.Companion.moduleManager!!.getModulesByCategory(category).indices) {
+                    for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                         if (offsetY + y < mouseY && mouseY < offsetY + y + fr.FONT_HEIGHT + 1) {
                             moduleViews[i].expanded = !moduleViews[i].expanded
                             return
@@ -205,8 +207,8 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
 
         fun onPostRender() {
             var y = 1 + fr.FONT_HEIGHT
-            for (i in Sugoma.Companion.moduleManager!!.getModulesByCategory(category).indices) {
-                val module: Module = Sugoma.Companion.moduleManager!!.getModulesByCategory(
+            for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
+                val module: Module = Sugoma.moduleManager.getModulesByCategory(
                     category
                 ).get(i)
                 if (offsetY + y < mouseY && mouseY < offsetY + y + fr.FONT_HEIGHT + 1 && offsetX < mouseX && mouseX < offsetX + width) {
@@ -238,7 +240,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             calculateHeight()
             var y = 5
             for (setting in module.settings) {
-                setting!!.render(offsetX, offsetY + y)
+                setting.render(offsetX, offsetY + y)
                 y += fr.FONT_HEIGHT + 1
             }
             if (waitOnKey) mc.fontRenderer.drawString(
@@ -256,7 +258,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
 
         fun updatePos(mouseX: Int, mouseY: Int) {
             for (setting in module.settings) {
-                setting!!.updatePos(mouseX, mouseY)
+                setting.updatePos(mouseX, mouseY)
             }
         }
 
@@ -280,7 +282,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             if (module.settings.size == 0) return
             var y = 5
             for (setting in module.settings) {
-                setting!!.onMouseClick(offsetX, offsetY + y, mouseX, mouseY, mouseButton)
+                setting.onMouseClick(offsetX, offsetY + y, mouseX, mouseY, mouseButton)
                 y += fr.FONT_HEIGHT + 1
             }
             if (mouseButton == 0) {
@@ -295,23 +297,32 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             if (module.settings.size == 0) return
             var y = 5
             for (setting in module.settings) {
-                setting!!.onMouseRelease(offsetX, offsetY + y, mouseX, mouseY, state)
+                setting.onMouseRelease(offsetX, offsetY + y, mouseX, mouseY, state)
                 y += fr.FONT_HEIGHT + 1
             }
         }
 
         fun keyTyped(typedChar: Char, keycode: Int) {
             if (waitOnKey) {
-                if (keycode == Keyboard.KEY_BACK) {
-                    module.key = 0
-                    waitOnKey = false
-                    Sugoma.Companion.moduleManager!!.save()
-                } else if (keycode == Keyboard.KEY_COMMA) {
-                    waitOnKey = false
-                } else {
-                    waitOnKey = false
-                    module.key = keycode
-                    Sugoma.Companion.moduleManager!!.save()
+                when (keycode) {
+                    Keyboard.KEY_BACK -> {
+                        module.key = 0
+                        waitOnKey = false
+                        Sugoma.moduleManager.save()
+                    }
+                    Keyboard.KEY_ESCAPE -> {
+                        module.key = 0
+                        waitOnKey = false
+                        Sugoma.moduleManager.save()
+                    }
+                    Keyboard.KEY_COMMA -> {
+                        waitOnKey = false
+                    }
+                    else -> {
+                        waitOnKey = false
+                        module.key = keycode
+                        Sugoma.moduleManager.save()
+                    }
                 }
             }
         }
@@ -319,8 +330,8 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
 
     companion object {
         const val viewWidth = 120
-        var mc = Minecraft.getMinecraft()
-        var fr = mc.fontRenderer
+        val mc: Minecraft = Minecraft.getMinecraft()
+        val fr: FontRenderer = mc.fontRenderer
         private val rounded_rectangle = ResourceLocation(Reference.MODID, "textures/rounded_rectangle.png")
         fun drawRectangle(
             x: Int,
