@@ -17,6 +17,7 @@ buildscript {
         maven(url = "https://maven.minecraftforge.net/")
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
         maven(url = "https://repo.spongepowered.org/repository/maven-public/")
+        maven(url = "http://maven.shadowfacts.net/")
 
     }
     dependencies {
@@ -25,6 +26,7 @@ buildscript {
         }
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50")
         classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
+        classpath("net.shadowfacts:Forgelin:1.8.4")
     }
 }
 

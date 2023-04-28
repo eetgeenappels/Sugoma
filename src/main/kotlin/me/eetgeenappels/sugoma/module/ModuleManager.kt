@@ -32,7 +32,7 @@ class ModuleManager {
         modules.add(AutoCrystal())
         modules.add(AutoEZ())
         // world
-        //modules.add(Scaffold())
+        modules.add(Scaffold())
         // player
         modules.add(Sprint())
         //modules.add(NoFall())

@@ -8,6 +8,7 @@ import net.minecraft.item.ItemBlock
 import net.minecraft.network.play.client.CPacketEntityAction
 import net.minecraft.network.play.client.CPacketHeldItemChange
 import net.minecraft.network.play.client.CPacketPlayer
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.EnumHand
 import net.minecraft.util.math.BlockPos
@@ -32,9 +33,7 @@ object BlockUtil {
     )
 
     fun findNeighborBlocks(pos: BlockPos): List<Neighbour> {
-        var pos = pos
         val neighbours: MutableList<Neighbour> = ArrayList()
-        pos = BlockPos(floor(pos.x.toDouble()), floor(pos.y.toDouble()), floor(pos.z.toDouble()))
         if (!emptyBlocks.contains(mc.world.getBlockState(pos.down()).block)) neighbours.add(
             Neighbour(
                 pos.down(),
@@ -55,35 +54,44 @@ object BlockUtil {
         )
         if (!emptyBlocks.contains(mc.world.getBlockState(pos.south()).block)) neighbours.add(
             Neighbour(
-                pos.down().south(), EnumFacing.SOUTH
+                pos.south(),
+                EnumFacing.NORTH
             )
         )
         if (!emptyBlocks.contains(mc.world.getBlockState(pos.west()).block)) neighbours.add(
             Neighbour(
-                pos.down().west(),
+                pos.west(),
                 EnumFacing.EAST
             )
         )
         return neighbours
     }
+    fun getNeighbours(pos: BlockPos): List<BlockPos> {
+        return listOf(
+            pos.north(),
+            pos.east(),
+            pos.south(),
+            pos.west(),
+            pos.down())
+    }
 
-    fun place(posI: BlockPos?, face: EnumFacing?, rotate: Boolean) {
+    fun place(posI: BlockPos, face: EnumFacing, rotate: Boolean) {
         var pos = posI
         when (face) {
             EnumFacing.UP -> {
-                pos = pos!!.add(0, 1, 0)
+                pos = pos.down()
             }
             EnumFacing.NORTH -> {
-                pos = pos!!.add(0, 0, -1)
+                pos = pos.south()
             }
             EnumFacing.SOUTH -> {
-                pos = pos!!.add(0, 0, 1)
+                pos = pos.north()
             }
             EnumFacing.EAST -> {
-                pos = pos!!.add(-1, 0, 0)
+                pos = pos.west()
             }
             EnumFacing.WEST -> {
-                pos = pos!!.add(1, 0, 0)
+                pos = pos.east()
             }
 
             else -> {}
@@ -105,7 +113,7 @@ object BlockUtil {
             return
         }
         var crouched = false
-        if (!mc.player.isSneaking && emptyBlocks.contains(pos?.let { mc.world.getBlockState(it).block })) {
+        if (!mc.player.isSneaking && emptyBlocks.contains(mc.world.getBlockState(pos).block)) {
             mc.player.connection.sendPacket(CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING))
             crouched = true
         }
@@ -116,23 +124,17 @@ object BlockUtil {
         }
         if (rotate) {
             val player = mc.player
-            val blockPos = BlockPos(
-                (pos!!.x.toFloat() + 0.5f).toDouble(),
-                (pos.y.toFloat() - 0.5f).toDouble(),
-                (pos.z.toFloat() + 0.5f).toDouble()
-            )
 
             // Calculate the angle between the player's position and the target block position
-            val dx = blockPos.x + 0.5 - player.posX
-            val dy = blockPos.y + 0.5 - (player.posY + player.getEyeHeight())
-            val dz = blockPos.z + 0.5 - player.posZ
+            val dx = pos.x + 0.5 - player.posX
+            val dy = pos.y + 0.5 - (player.posY + player.getEyeHeight())
+            val dz = pos.z + 0.5 - player.posZ
             val distance = sqrt(dx * dx + dy * dy + dz * dz)
             val yaw = Math.toDegrees(atan2(dz, dx)).toFloat() - 90
             val pitch = -Math.toDegrees(atan2(dy, distance)).toFloat()
             // Send a packet to the server to update the player's rotation
             player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
         }
-        Sugoma.logger.info("Block Position x: " + pos!!.x + " y: " + pos.y + " z: " + pos.z + " face: " + face!!.getName())
         mc.playerController.processRightClickBlock(
             mc.player,
             mc.world,
@@ -141,6 +143,7 @@ object BlockUtil {
             Vec3d(0.5, 0.5, 0.5),
             EnumHand.MAIN_HAND
         )
+        mc.player.connection.sendPacket(CPacketPlayerTryUseItemOnBlock(pos, face, EnumHand.MAIN_HAND,posI.x.toFloat(), posI.y.toFloat(), posI.z.toFloat()))
         mc.player.swingArm(EnumHand.MAIN_HAND)
         mc.player.connection.sendPacket(CPacketHeldItemChange(oldSlot))
         mc.player.inventory.currentItem = oldSlot
