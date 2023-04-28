@@ -67,10 +67,10 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             targetSortingType = this.targetingMode.currentModeIndex,
             reach = reach.value
         ) ?: return
-        // add target to AutoEZ registry
         breakTime += 1
         if (crystalBreak(target)) {
             breakTime = -breakDelay.value.toInt()
+            // add target to AutoEZ registry
             (Sugoma.moduleManager.getModule("AutoEZ")as AutoEZ).addTarget(target)
         }
         placeTime += 1
@@ -89,10 +89,13 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
     private fun crystalBreak(target: Entity): Boolean {
         // break delay
         if (breakTime < breakDelay.value.toInt()) return false
+
+        // find end crystals
         val endCrystals = mc.world.loadedEntityList.stream()
             .filter { entity: Entity? -> mc.player.getDistance(entity!!) <= reach.value }
             .filter { entity: Entity? -> entity is EntityEnderCrystal }
             .collect(Collectors.toList())
+        // check for an annoying crystal strat
         var neoTarget : Entity = target
         if (killThatOneVeryAnnoyingCrystalStrat.value) {
             for (crystal in endCrystals) {
@@ -103,7 +106,7 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
                 }
             }
         }
-
+        // find max damage crystal
         var maxDamage = -1000000.0
         var bestCrystal: Entity? = null
         for (crystal in endCrystals) {

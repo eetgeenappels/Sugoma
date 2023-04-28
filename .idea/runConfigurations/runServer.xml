@@ -2,7 +2,7 @@
 <component>
   <configuration default="false" factoryName="Application" name="runServer" singleton="false" type="Application">
     <option name="MAIN_CLASS_NAME" value="net.minecraftforge.legacydev.MainServer"/>
-    <option name="VM_PARAMETERS" value="-Dforge.logging.console.level=debug -Dforge.logging.markers=SCAN,REGISTRIES,REGISTRYDUMP"/>
+    <option name="VM_PARAMETERS" value="-Dforge.logging.console.level=debug -Dforge.logging.markers=SCAN,REGISTRIES,REGISTRYDUMP -Dnet.minecraftforge.gradle.GradleStart.srg.srg-mcp=/Users/nathanmiddelkoop/Documents/lol/Sugoma/build/createSrgToMcp/output.srg -Dmixin.env.remapRefMap=true -Dmixin.env.refMapRemappingFile=/Users/nathanmiddelkoop/Documents/lol/Sugoma/build/createSrgToMcp/output.srg"/>
     <option name="PROGRAM_PARAMETERS" value=""/>
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run"/>
     <module name="Sugoma.main"/>
@@ -11,7 +11,7 @@
       <env name="MOD_CLASSES" value="$PROJECT_DIR$/build/resources/main:$PROJECT_DIR$/build/classes/java/main:$PROJECT_DIR$/build/classes/scala/main:$PROJECT_DIR$/build/classes/kotlin/main"/>
       <env name="mainClass" value="net.minecraft.launchwrapper.Launch"/>
       <env name="MCP_MAPPINGS" value="stable_39-1.12"/>
-      <env name="FORGE_VERSION" value="14.23.5.2855"/>
+      <env name="FORGE_VERSION" value="14.23.5.2860"/>
       <env name="FORGE_GROUP" value="net.minecraftforge"/>
       <env name="tweakClass" value="net.minecraftforge.fml.common.launcher.FMLServerTweaker"/>
       <env name="MC_VERSION" value="${MC_VERSION}"/>

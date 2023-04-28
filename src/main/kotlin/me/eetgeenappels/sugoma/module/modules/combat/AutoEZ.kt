@@ -30,6 +30,7 @@ class AutoEZ : Module(name = "AutoEZ",  description = "Automatically says EZ", c
             if (!target.onTick()) {
                 removeList.add(target)
             }
+            // check if target died
             if (target.entity.isDead) {
                 // check for delay
                 if (delayCounter > delay) {

@@ -4,7 +4,7 @@ import me.eetgeenappels.sugoma.module.Category
 import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.util.BlockUtil
 
-class Scaffold : Module("Scuffold", "places blocks under you", Category.World) {
+class Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
     override fun onTick() {
         if (BlockUtil.emptyBlocks.contains(mc.world.getBlockState(mc.player.position.down()).block)) {
             val neighbours = BlockUtil.findNeighborBlocks(mc.player.position.down())
