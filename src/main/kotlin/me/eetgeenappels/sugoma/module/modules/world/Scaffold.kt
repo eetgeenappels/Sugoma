@@ -3,15 +3,27 @@ package me.eetgeenappels.sugoma.module.modules.world
 import me.eetgeenappels.sugoma.module.Category
 import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.util.BlockUtil
+import net.minecraft.util.math.BlockPos
 
 class Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
     override fun onTick() {
-        if (BlockUtil.emptyBlocks.contains(mc.world.getBlockState(mc.player.position.down()).block)) {
-            val neighbours = BlockUtil.findNeighborBlocks(mc.player.position.down())
-            if (neighbours.isEmpty()) return
-            val placeBlock = neighbours[0].position
+        val playerPos = BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ)
+        if (BlockUtil.emptyBlocks.contains(mc.world.getBlockState(playerPos.down()).block)) {
+            var neighbours = BlockUtil.findNeighborBlocks(playerPos.down())
+            if (neighbours.isEmpty()) {
+                // no neighbours check for more blocks
+                for (blockPos in BlockUtil.getNeighbours(playerPos.down())){
+                    neighbours = BlockUtil.findNeighborBlocks(blockPos)
+                    if (neighbours.isEmpty()) continue
+                    val facing = neighbours[0].placeFace
+                    BlockUtil.place(playerPos.down(), facing, true)
+                    return
+                }
+                return
+            }
+            //val placeBlock = neighbours[0].position
             val facing = neighbours[0].placeFace
-            BlockUtil.place(placeBlock, facing, true)
+            BlockUtil.place(playerPos.down(), facing, true)
         }
     }
 
