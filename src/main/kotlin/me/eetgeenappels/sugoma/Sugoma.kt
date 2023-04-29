@@ -4,7 +4,6 @@ import me.eetgeenappels.sugoma.events.Events
 import me.eetgeenappels.sugoma.module.ModuleManager
 import me.eetgeenappels.sugoma.proxy.ClientProxy
 import me.eetgeenappels.sugoma.ui.HUD
-import me.eetgeenappels.sugoma.util.MixinLoader
 import me.eetgeenappels.sugoma.util.Reference
 import net.minecraft.client.Minecraft
 import net.minecraftforge.common.MinecraftForge
@@ -41,6 +40,7 @@ class Sugoma {
                     for (m in moduleManager.moduleList) {
                         if (m.key == keycode) m.toggle()
                     }
+                    if (moduleManager.clickGuiModule.key == keycode) moduleManager.clickGuiModule.toggle()
                 }
             }
         } catch (e: Exception) {

@@ -124,6 +124,14 @@ tasks.create("copyResourceToClasses", Copy::class) {
     into("$buildDir/classes/kotlin/main")
     from(tasks.processResources.get().destinationDir)
 }
+tasks.jar {
+    manifest {
+        attributes(
+            "FMLCorePlugin" to "me.eetgeenappels.sugoma.util.MixinLoader",
+            "FMLCorePluginContainsFMLMod" to true
+        )
+    }
+}
 
 configure<MixinExtension> {
     add(sourceSets.main.get(), "mixin.sugoma.refmap.json")

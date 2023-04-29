@@ -22,11 +22,12 @@ import kotlin.String
 
 class ModuleManager {
     var modules: MutableList<Module> = ArrayList()
+    val clickGuiModule: ClickGuiModule
 
     init {
 
         // render
-        modules.add(ClickGuiModule())
+        clickGuiModule = ClickGuiModule()
         modules.add(Fulbright())
         // combat
         modules.add(KillAura())

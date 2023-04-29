@@ -5,11 +5,13 @@ import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.module.modules.settings.ToggleSetting
 import me.eetgeenappels.sugoma.util.BlockUtil
 import net.minecraft.init.Blocks
+import net.minecraft.network.play.client.CPacketPlayer
 import net.minecraft.util.math.BlockPos
 
 class Surround : Module("Surround", "Surrounds you with obsidian", Category.World) {
 
     private val disableWhenOutsideHole = ToggleSetting("DisableWhenOutsideHole", true)
+    private val moveToCenter = ToggleSetting("MoveToCenter", true)
 
     private var initialIsInHole = false
     private var initialBlockPos = BlockPos(0,0,0)
@@ -18,7 +20,21 @@ class Surround : Module("Surround", "Surrounds you with obsidian", Category.Worl
     override fun onEnable () {
         // check if neighbour all blocks around player are obsidian
         initialIsInHole = checkHole()
-        initialBlockPos = BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ)
+        initialBlockPos = BlockPos(mc.player.posX.toInt(), mc.player.posY.toInt(), mc.player.posZ.toInt())
+        if (moveToCenter.value) {
+            // center player position
+            mc.player.posX = initialBlockPos.x + 0.5
+            mc.player.posZ = initialBlockPos.z + 0.5
+
+            mc.player.connection.sendPacket(
+                CPacketPlayer.Position(
+                    mc.player.posX,
+                    mc.player.posY,
+                    mc.player.posZ,
+                    mc.player.onGround
+                )
+            )
+        }
     }
 
     override fun onTick (){
@@ -34,7 +50,7 @@ class Surround : Module("Surround", "Surrounds you with obsidian", Category.Worl
             } else {
                 if (checkHole()) {
                     initialIsInHole = true
-                    initialBlockPos = BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ)
+                    initialBlockPos = BlockPos(mc.player.posX.toInt(), mc.player.posY.toInt(), mc.player.posZ.toInt())
                 }
             }
         }

@@ -12,7 +12,6 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.*
 import org.lwjgl.input.Keyboard
-import java.io.IOException
 import java.util.function.Consumer
 
 class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
@@ -54,7 +53,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             }
         }
         for (view in categoryViews) {
-            view.keyTyped(typedChar, keyCode)
+            view.keyTyped(keyCode)
         }
     }
 
@@ -67,7 +66,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
     override fun actionPerformed(button: GuiButton) {
         if (button.id == 0) {
             // Do something when the button is clicked
-            Sugoma.Companion.logger.info("The button was clicked!")
+            Sugoma.logger.info("The button was clicked!")
         }
     }
 
@@ -77,7 +76,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
 
     // front-end components to view categories and modules and be able to toggle different modules.
     internal class CategoryView(var category: Category, var offsetX: Int, var offsetY: Int) {
-        var width: Int
+        val width: Int
         var height = 0
         var grappled = false
         var mouseOffsetX = 0
@@ -124,14 +123,14 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
                 offsetX, offsetY,
                 width, fr.FONT_HEIGHT, 0f, 0f, 0f, 1f
             )
-            fr.drawString(category.categoryName, offsetX + 2, offsetY + y, -0x1)
+            fr.drawString(category.categoryName, offsetX + 2, offsetY, -0x1)
             y += fr.FONT_HEIGHT + 1
 
             // draw modules and settings
             for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                 val module: Module = Sugoma.moduleManager.getModulesByCategory(
                     category
-                ).get(i)
+                )[i]
                 if (module.name.equals("ClickGui", ignoreCase = true)) continue
                 if (module.toggled) drawRectangle(
                     offsetX, offsetY + y,
@@ -152,8 +151,9 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             var y = 1 + fr.FONT_HEIGHT
             for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                 if (Sugoma.moduleManager.getModulesByCategory(category)[i].name == "ClickGui")
-                moduleViews[i].offsetX = offsetX
-                moduleViews[i].offsetY = offsetY + y + fr.FONT_HEIGHT
+                    moduleViews[i].offsetX = offsetX
+                else
+                    moduleViews[i].offsetY = offsetY + y + fr.FONT_HEIGHT
                 y += fr.FONT_HEIGHT + 1
                 if (moduleViews[i].expanded) y += moduleViews[i].calculateHeight()
             }
@@ -172,7 +172,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
                     }
                     for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                         if (offsetY + y < mouseY && mouseY < offsetY + y + fr.FONT_HEIGHT + 1) {
-                            Sugoma.moduleManager.getModulesByCategory(category).get(i).toggle()
+                            Sugoma.moduleManager.getModulesByCategory(category)[i].toggle()
                             return
                         }
                         y += fr.FONT_HEIGHT + 1
@@ -210,7 +210,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             for (i in Sugoma.moduleManager.getModulesByCategory(category).indices) {
                 val module: Module = Sugoma.moduleManager.getModulesByCategory(
                     category
-                ).get(i)
+                )[i]
                 if (offsetY + y < mouseY && mouseY < offsetY + y + fr.FONT_HEIGHT + 1 && offsetX < mouseX && mouseX < offsetX + width) {
                     // render description box
                     drawRectangle(
@@ -224,9 +224,9 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             }
         }
 
-        fun keyTyped(typedChar: Char, keyCode: Int) {
+        fun keyTyped(keyCode: Int) {
             for (view in moduleViews) {
-                view.keyTyped(typedChar, keyCode)
+                view.keyTyped(keyCode)
             }
         }
     }
@@ -280,7 +280,6 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
         }
 
         fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-            if (module.settings.size == 0) return
             var y = 5
             for (setting in module.settings) {
                 setting.onMouseClick(offsetX, offsetY + y, mouseX, mouseY, mouseButton)
@@ -290,7 +289,6 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
                 if (offsetX < mouseX && mouseX < offsetX + viewWidth && offsetY + y < mouseY && mouseY < offsetY + y + mc.fontRenderer.FONT_HEIGHT) {
                     waitOnKey = true
                 }
-                y += fr.FONT_HEIGHT + 1
             }
         }
 
@@ -303,7 +301,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             }
         }
 
-        fun keyTyped(typedChar: Char, keycode: Int) {
+        fun keyTyped(keycode: Int) {
             if (waitOnKey) {
                 when (keycode) {
                     Keyboard.KEY_BACK -> {
