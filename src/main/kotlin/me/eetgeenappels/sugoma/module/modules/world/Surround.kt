@@ -3,6 +3,7 @@ package me.eetgeenappels.sugoma.module.modules.world
 import me.eetgeenappels.sugoma.module.Category
 import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.util.BlockUtil
+import net.minecraft.init.Blocks
 import net.minecraft.util.math.BlockPos
 
 class Surround : Module("Surround", "", Category.World) {
@@ -12,6 +13,7 @@ class Surround : Module("Surround", "", Category.World) {
 
     override fun onEnable () {
         // check if neighbour blocks around player are
+
     }
 
     override fun onTick (){
@@ -30,19 +32,17 @@ class Surround : Module("Surround", "", Category.World) {
                     neighbours = BlockUtil.findNeighborBlocks(blockPos)
                     if (neighbours.isEmpty()) continue
                     val facing = neighbours[0].placeFace
-                    BlockUtil.place(pos, facing, true)
+                    BlockUtil.placeSpecificBlock(pos, facing, Blocks.OBSIDIAN)
                     return true
                 }
                 return false
             }
             //val placeBlock = neighbours[0].position
             val facing = neighbours[0].placeFace
-            BlockUtil.place(pos, facing, true)
+            BlockUtil.placeSpecificBlock(pos, facing, Blocks.OBSIDIAN)
 
             return true
         }
-
         return false
     }
-
 }

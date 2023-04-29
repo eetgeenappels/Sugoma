@@ -16,14 +16,14 @@ class Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
                     neighbours = BlockUtil.findNeighborBlocks(blockPos)
                     if (neighbours.isEmpty()) continue
                     val facing = neighbours[0].placeFace
-                    BlockUtil.place(playerPos.down(), facing, true)
+                    BlockUtil.place(playerPos.down(), facing)
                     return
                 }
                 return
             }
             //val placeBlock = neighbours[0].position
             val facing = neighbours[0].placeFace
-            BlockUtil.place(playerPos.down(), facing, true)
+            BlockUtil.place(playerPos.down(), facing)
         }
     }
 
