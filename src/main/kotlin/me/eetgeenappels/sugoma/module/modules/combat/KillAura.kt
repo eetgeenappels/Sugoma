@@ -13,22 +13,12 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 class KillAura : Module("KillAura", "An aura that kills stuff", Category.Combat) {
-    private val reach: SliderSetting
-    private val targetPlayers: ToggleSetting
-    private val targetMobs: ToggleSetting
-    private val targetAnimals: ToggleSetting
+    val reach: SliderSetting = SliderSetting("Reach", 3f, 5f, 4f)
+    val targetPlayers: ToggleSetting = ToggleSetting("TargetPlayers", true)
+    val targetMobs: ToggleSetting = ToggleSetting("TargetMobs", true)
+    val targetAnimals: ToggleSetting = ToggleSetting("TargetAnimals", true)
+    val noSwing: ToggleSetting = ToggleSetting("NoSwing", false)
 
-    init {
-        reach = SliderSetting("Reach", 3f, 5f, 4f)
-        settings.add(reach)
-        targetPlayers = ToggleSetting("TargetPlayers", true)
-        settings.add(targetPlayers)
-        targetMobs = ToggleSetting("TargetMobs", true)
-        settings.add(targetMobs)
-        targetAnimals = ToggleSetting("TargetAnimals", true)
-        settings.add(targetAnimals)
-        settings.add(ToggleSetting("NoSwing", false))
-    }
 
     override fun onTick() {
         super.onTick()
@@ -62,7 +52,7 @@ class KillAura : Module("KillAura", "An aura that kills stuff", Category.Combat)
         player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
         if (mc.player.getCooledAttackStrength(0f) >= 1) {
             mc.playerController.attackEntity(mc.player, e)
-            if (!(getSetting("NoSwing") as ToggleSetting).value) mc.player.swingArm(EnumHand.MAIN_HAND)
+            if (!noSwing.value) mc.player.swingArm(EnumHand.MAIN_HAND)
         }
     }
 }

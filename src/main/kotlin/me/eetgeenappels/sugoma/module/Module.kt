@@ -17,13 +17,13 @@ open class Module(var name: String, var description: String, var category: Categ
     }
 
     open fun onTick() {}
-    fun isToggled(): Boolean {
-        return toggled
-    }
-
     fun toggle() {
         toggled = !toggled
         if (toggled) onEnable() else onDisable()
+    }
+
+    fun addSetting(setting: Setting) {
+        settings.add(setting)
     }
 
     open fun onEnable() {

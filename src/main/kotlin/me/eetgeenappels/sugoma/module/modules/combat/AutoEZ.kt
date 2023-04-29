@@ -10,16 +10,11 @@ import net.minecraft.entity.player.EntityPlayer
 
 class AutoEZ : Module(name = "AutoEZ",  description = "Automatically says EZ", category = Category.Combat) {
 
-    private val message : ModeSetting = ModeSetting("Message", arrayOf("Sugoma on Top", "EZ", "ez", "eetgeenappels is best!"))
-    private var onlyPlayers : ToggleSetting = ToggleSetting("OnlyPlayers", true)
-    private var targetList : MutableList<Target> = ArrayList()
+    val message : ModeSetting = ModeSetting("Message", arrayOf("Sugoma on Top", "EZ", "ez", "eetgeenappels is best!"))
+    var onlyPlayers : ToggleSetting = ToggleSetting("OnlyPlayers", true)
+    var targetList : MutableList<Target> = ArrayList()
     private val delay = 20
     private var delayCounter = 0
-
-    init {
-        settings.add(message)
-        settings.add(onlyPlayers)
-    }
 
     override fun onTick() {
         // delayCounter update

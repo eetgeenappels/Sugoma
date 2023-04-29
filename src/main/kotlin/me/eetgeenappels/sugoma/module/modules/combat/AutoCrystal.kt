@@ -24,46 +24,29 @@ import java.util.*
 import java.util.stream.Collectors
 
 class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end crystals ", Category.Combat) {
-    private val range = SliderSetting("Range", 10f, 20f, 15f)
-    private val reach = SliderSetting("Reach", 3f, 5f, 3f)
-    private val targetingMode = ModeSetting("Targeting", arrayOf("Nearest", "Exposedness"))
-    private val minDamageBreak = SliderSetting("minDamageBreak", 0f, 18f, 6f)
-    private val maxSelfDamageBreak = SliderSetting("maxDamageSelfBreak", 0f, 18f, 10f)
-    private val minDamagePlace = SliderSetting("minDamagePlace", 0f, 18f, 6f)
-    private val maxSelfDamagePlace = SliderSetting("maxDamageSelfPlace", 0f, 18f, 10f)
-    private val antiSuicide = ToggleSetting("AntiSuicide", true)
-    private val breakDelay = SliderSetting("BreakDelay", 0f, 5f, 1f, 0)
-    private val placeDelay = SliderSetting("PlaceDelay", 0f, 5f, 3f, 0)
-    private val multiplace = ToggleSetting("Multiplace", false)
-    private val lookAtCrystal = ToggleSetting("LookAtCrystal", false)
-    private val killThatOneVeryAnnoyingCrystalStrat = ToggleSetting("killThatOneVeryAnnoyyingCrystalStrat", true)
-    private val targetArmorStands = ToggleSetting("TargetArmorStands", false)
+    val range = SliderSetting("Range", 10f, 20f, 15f)
+    val reach = SliderSetting("Reach", 3f, 5f, 3f)
+    val targetingMode = ModeSetting("Targeting", arrayOf("Nearest", "Exposedness"))
+    val minDamageBreak = SliderSetting("minDamageBreak", 0f, 18f, 6f)
+    val maxSelfDamageBreak = SliderSetting("maxDamageSelfBreak", 0f, 18f, 10f)
+    val minDamagePlace = SliderSetting("minDamagePlace", 0f, 18f, 6f)
+    val maxSelfDamagePlace = SliderSetting("maxDamageSelfPlace", 0f, 18f, 10f)
+    val antiSuicide = ToggleSetting("AntiSuicide", true)
+    val breakDelay = SliderSetting("BreakDelay", 0f, 5f, 1f, 0)
+    val placeDelay = SliderSetting("PlaceDelay", 0f, 5f, 3f, 0)
+    val multiplace = ToggleSetting("Multiplace", false)
+    val lookAtCrystal = ToggleSetting("LookAtCrystal", false)
+    val killThatOneVeryAnnoyingCrystalStrat = ToggleSetting("killThatOneVeryAnnoyyingCrystalStrat", true)
+    val targetArmorStands = ToggleSetting("TargetArmorStands", false)
     private var placeTime = 0
     private var breakTime = 0
-
-    init {
-        settings.add(range)
-        settings.add(reach)
-        settings.add(targetingMode)
-        settings.add(minDamageBreak)
-        settings.add(maxSelfDamageBreak)
-        settings.add(minDamagePlace)
-        settings.add(maxSelfDamagePlace)
-        settings.add(antiSuicide)
-        settings.add(breakDelay)
-        settings.add(placeDelay)
-        settings.add(multiplace)
-        settings.add(lookAtCrystal)
-        settings.add(killThatOneVeryAnnoyingCrystalStrat)
-        settings.add(targetArmorStands)
-    }
 
     override fun onTick() {
         val target: Entity = CombatUtil.findTarget(
             targetMobs = false,
             targetAnimals =  false,
             targetPlayers =  true,
-            targetArmorStand = true,
+            targetArmorStand = this.targetArmorStands.value,
             targetSortingType = this.targetingMode.currentModeIndex,
             reach = reach.value
         ) ?: return

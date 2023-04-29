@@ -195,7 +195,7 @@ object BlockUtil {
             mc.player.connection.sendPacket(CPacketEntityAction(mc.player, CPacketEntityAction.Action.START_SNEAKING))
             crouched = true
         }
-        if (mc.player.heldItemMainhand.item !is ItemBlock) {
+        if (mc.player.heldItemMainhand.item !is ItemBlock || (mc.player.heldItemMainhand.item as ItemBlock).block != block) {
             mc.player.connection.sendPacket(CPacketHeldItemChange(newSlot))
             mc.player.inventory.currentItem = newSlot
             mc.playerController.updateController()
