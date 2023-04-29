@@ -109,7 +109,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
                 this.mouseX = mouseX
                 this.mouseY = mouseY
             }
-            moduleViews.forEach(Consumer { moduleView: ModuleView -> moduleView.updatePos(mouseX, mouseY) })
+            moduleViews.forEach(Consumer { moduleView: ModuleView -> moduleView.updatePos(mouseX, mouseY, offsetX) })
         }
 
         fun onRender() {
@@ -232,7 +232,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
     }
 
     // front-end component to view the module settings.
-    internal class ModuleView(var module: Module, var offsetX: Int, var offsetY: Int) {
+    internal class ModuleView(val module: Module, var offsetX: Int, var offsetY: Int) {
         var width: Int
         var height = 0
         var expanded = false
@@ -256,7 +256,8 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             y += fr.FONT_HEIGHT + 1
         }
 
-        fun updatePos(mouseX: Int, mouseY: Int) {
+        fun updatePos(mouseX: Int, mouseY: Int, offsetX: Int) {
+            this.offsetX = offsetX
             for (setting in module.settings) {
                 setting.updatePos(mouseX, mouseY)
             }
@@ -272,7 +273,7 @@ class ClickGUI(private val clickGuiModule: ClickGuiModule) : GuiScreen() {
             return height
         }
 
-        var waitOnKey = false
+        private var waitOnKey = false
 
         init {
             width = viewWidth

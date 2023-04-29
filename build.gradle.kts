@@ -126,7 +126,8 @@ tasks.create("copyResourceToClasses", Copy::class) {
 }
 
 configure<MixinExtension> {
-    add(sourceSets.main.get(), "mixins.sugoma.refmap.json")
+    add(sourceSets.main.get(), "mixin.sugoma.refmap.json")
+
     //disableAnnotationProcessorCheck()
 }
 
