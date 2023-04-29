@@ -9,9 +9,11 @@ import me.eetgeenappels.sugoma.module.modules.player.Sprint
 import me.eetgeenappels.sugoma.module.modules.render.ClickGuiModule
 import me.eetgeenappels.sugoma.module.modules.render.Fulbright
 import me.eetgeenappels.sugoma.module.modules.settings.ModeSetting
+import me.eetgeenappels.sugoma.module.modules.settings.Setting
 import me.eetgeenappels.sugoma.module.modules.settings.SliderSetting
 import me.eetgeenappels.sugoma.module.modules.settings.ToggleSetting
 import me.eetgeenappels.sugoma.module.modules.world.Scaffold
+import me.eetgeenappels.sugoma.module.modules.world.Surround
 import java.io.*
 import java.util.stream.Collectors
 import kotlin.Exception
@@ -33,9 +35,22 @@ class ModuleManager {
         modules.add(AutoEZ())
         // world
         modules.add(Scaffold())
+        modules.add(Surround())
         // player
         modules.add(Sprint())
         //modules.add(NoFall())
+
+        // automaticly load settings from class variables
+        for (module in modules) {
+            val moduleVariables = module.javaClass.declaredFields
+            for (variable in moduleVariables) {
+                variable.isAccessible = true
+                if (variable.get(module) is Setting) {
+                    module.addSetting(variable.get(module) as Setting)
+                }
+            }
+        }
+
         load()
     }
 

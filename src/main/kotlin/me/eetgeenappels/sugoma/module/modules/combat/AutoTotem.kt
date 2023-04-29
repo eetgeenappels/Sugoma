@@ -12,19 +12,9 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumHand
 
 class AutoTotem : Module("AutoTotem", "Automatically places totems in your hand", Category.Combat) {
-    private val mode: ModeSetting
-    private val hp_for_totem: SliderSetting
-    private val swordGapple: ToggleSetting
-
-    init {
-        val modes = arrayOf("Totem", "Gapple", "Crystal")
-        mode = ModeSetting("Mode", modes)
-        settings.add(mode)
-        hp_for_totem = SliderSetting("HpForTotem", 1f, 36f, 16f, 0)
-        settings.add(hp_for_totem)
-        swordGapple = ToggleSetting("SwordGapple", false)
-        settings.add(swordGapple)
-    }
+    val mode: ModeSetting =  ModeSetting("Mode", arrayOf("Totem", "Gapple", "Crystal"))
+    val hp_for_totem: SliderSetting = SliderSetting("HpForTotem", 1f, 36f, 16f, 0)
+    val swordGapple: ToggleSetting = ToggleSetting("SwordGapple", false)
 
     override fun onTick() {
         if (mode.currentModeIndex == 0) {
