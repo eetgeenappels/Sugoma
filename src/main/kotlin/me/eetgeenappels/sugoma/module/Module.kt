@@ -42,4 +42,5 @@ open class Module(var name: String, var description: String, var category: Categ
     open fun onPacket(packet: Packet<*>): Boolean{
         return false
     }
+    open fun onConstTick(){}
 }

@@ -16,6 +16,7 @@ class Events {
         if (mc.player != null) {
             for (module in Sugoma.moduleManager.modules) {
                 if (module.toggled) module.onTick()
+                module.onConstTick()
             }
         }
     }

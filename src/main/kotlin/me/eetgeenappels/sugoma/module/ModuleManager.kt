@@ -4,6 +4,7 @@ import me.eetgeenappels.sugoma.module.modules.combat.AutoCrystal
 import me.eetgeenappels.sugoma.module.modules.combat.AutoEZ
 import me.eetgeenappels.sugoma.module.modules.combat.AutoTotem
 import me.eetgeenappels.sugoma.module.modules.combat.KillAura
+import me.eetgeenappels.sugoma.module.modules.player.Blink
 import me.eetgeenappels.sugoma.module.modules.player.NoFall
 import me.eetgeenappels.sugoma.module.modules.player.Sprint
 import me.eetgeenappels.sugoma.module.modules.render.ClickGuiModule
@@ -39,7 +40,8 @@ class ModuleManager {
         modules.add(Surround())
         // player
         modules.add(Sprint())
-        //modules.add(NoFall())
+        modules.add(NoFall())
+        modules.add(Blink())
 
         // automaticly load settings from class variables
         for (module in modules) {
