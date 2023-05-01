@@ -27,7 +27,7 @@ object Scaffold : Module("Scaffold", "places blocks under you", Category.World) 
         }
     }
 
-    object {
-        private const val delay = 50 // The delay between block placements
-    }
+
+    private const val delay = 50 // The delay between block placements
+
 }

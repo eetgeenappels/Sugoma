@@ -10,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.EventBus
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent
@@ -26,6 +27,7 @@ class Sugoma {
         hud = HUD()
         EVENT_BUS.register(hud)
     }
+
     @SubscribeEvent
     fun key(event: KeyInputEvent?) {
         if (Minecraft.getMinecraft().world == null || Minecraft.getMinecraft().player == null) return

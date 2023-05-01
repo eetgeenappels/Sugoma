@@ -49,8 +49,6 @@ object ModuleManager {
                 }
             }
         }
-
-        load()
     }
 
     fun getModule(name: String?): Module? {
@@ -94,7 +92,7 @@ object ModuleManager {
     }
 
     // load settings from file
-    private fun load() {
+    fun load() {
         // create file "Sugoma/config.txt"
         val settingsFile = File("Sugoma/config.txt")
 
@@ -170,8 +168,6 @@ object ModuleManager {
             // check if split[1] is "Toggled"
             if (split[1].equals("Toggled", ignoreCase = true)) {
                 module.toggled = split[2].toBoolean()
-                if (module.toggled)
-                    module.onEnable()
                 continue
             }
 

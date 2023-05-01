@@ -10,6 +10,11 @@ import net.minecraftforge.common.MinecraftForge
 abstract class Module(var name: String, var description: String, var category: Category) {
     var key = 0
     var toggled = false
+        set(value) {
+            if (value && !toggled) onEnable()
+            if (!value && toggled) onDisable()
+            field = value
+        }
     var settings: MutableList<Setting>
     protected val mc: Minecraft
 
@@ -21,7 +26,6 @@ abstract class Module(var name: String, var description: String, var category: C
     abstract fun onTick()
     fun toggle() {
         toggled = !toggled
-        if (toggled) onEnable() else onDisable()
     }
 
     fun addSetting(setting: Setting) {

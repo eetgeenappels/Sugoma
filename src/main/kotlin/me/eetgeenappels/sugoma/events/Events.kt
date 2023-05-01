@@ -1,6 +1,7 @@
 package me.eetgeenappels.sugoma.events
 
 import me.eetgeenappels.sugoma.Sugoma
+import me.eetgeenappels.sugoma.module.ModuleManager
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 class Events {
     private val mc = Minecraft.getMinecraft()
 
+    private var tickInit:  Boolean = false
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent?) {
@@ -20,6 +22,10 @@ class Events {
                 if (module.toggled) module.onTick()
                 module.onConstTick()
             }
+        }
+        if (!tickInit && mc.player != null) {
+            ModuleManager.load()
+            tickInit = true
         }
     }
 
