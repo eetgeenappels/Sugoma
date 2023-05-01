@@ -11,7 +11,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumHand
 
-class AutoTotem : Module("AutoTotem", "Automatically places totems in your hand", Category.Combat) {
+object AutoTotem : Module("AutoTotem", "Automatically places totems in your hand", Category.Combat) {
     val mode: ModeSetting =  ModeSetting("Mode", arrayOf("Totem", "Gapple", "Crystal"))
     val hp_for_totem: SliderSetting = SliderSetting("HpForTotem", 1f, 36f, 16f, 0)
     val swordGapple: ToggleSetting = ToggleSetting("SwordGapple", false)

@@ -2,10 +2,12 @@ package me.eetgeenappels.sugoma.module
 
 import me.eetgeenappels.sugoma.module.modules.settings.Setting
 import net.minecraft.client.Minecraft
+import net.minecraft.entity.Entity
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.network.Packet
 import net.minecraftforge.common.MinecraftForge
 
-open class Module(var name: String, var description: String, var category: Category) {
+abstract class Module(var name: String, var description: String, var category: Category) {
     var key = 0
     var toggled = false
     var settings: MutableList<Setting>
@@ -16,7 +18,7 @@ open class Module(var name: String, var description: String, var category: Categ
         settings = ArrayList()
     }
 
-    open fun onTick() {}
+    abstract fun onTick()
     fun toggle() {
         toggled = !toggled
         if (toggled) onEnable() else onDisable()
@@ -43,4 +45,5 @@ open class Module(var name: String, var description: String, var category: Categ
         return false
     }
     open fun onConstTick(){}
+    open fun onPlayerAttack(player: EntityPlayer, entity: Entity) {}
 }

@@ -25,9 +25,6 @@ class Sugoma {
         EVENT_BUS.register(events)
         hud = HUD()
         EVENT_BUS.register(hud)
-
-        //MixinLoader()
-
     }
     @SubscribeEvent
     fun key(event: KeyInputEvent?) {
@@ -49,8 +46,8 @@ class Sugoma {
     }
     companion object{
         val events: Events = Events()
-        val moduleManager: ModuleManager = ModuleManager()
-        var logger = Logger.getLogger("Amogus Client")
+        val moduleManager: ModuleManager = ModuleManager
+        var logger: Logger = Logger.getLogger(Reference.NAME)
         var hud: HUD? = null
         var EVENT_BUS: EventBus = MinecraftForge.EVENT_BUS
 

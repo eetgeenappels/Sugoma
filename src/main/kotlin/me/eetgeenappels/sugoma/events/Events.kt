@@ -2,6 +2,8 @@ package me.eetgeenappels.sugoma.events
 
 import me.eetgeenappels.sugoma.Sugoma
 import net.minecraft.client.Minecraft
+import net.minecraft.entity.Entity
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.network.Packet
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
@@ -34,6 +36,14 @@ class Events {
         }
 
         return cancel
+    }
+
+    fun onPlayerAttack(player: EntityPlayer, entity: Entity) {
+        for (module in Sugoma.moduleManager.modules) {
+            if (module.toggled) {
+                module.onPlayerAttack(player, entity)
+            }
+        }
     }
 
 }

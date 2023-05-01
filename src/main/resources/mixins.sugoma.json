@@ -5,6 +5,7 @@
     "package": "me.eetgeenappels.mixin",
     "refmap": "mixin.sugoma.refmap.json",
     "mixins": [
-        "NetworkManagerMixin"
+        "NetworkManagerMixin",
+        "PlayerControllerMPMixin"
     ]
 }

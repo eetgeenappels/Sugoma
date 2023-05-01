@@ -7,7 +7,7 @@ import me.eetgeenappels.sugoma.util.BlockUtil
 import net.minecraft.init.Blocks
 import net.minecraft.util.math.BlockPos
 
-class Surround : Module("Surround", "Surrounds you with obsidian", Category.World) {
+object Surround : Module("Surround", "Surrounds you with obsidian", Category.World) {
 
 
     private val enableInHole = ToggleSetting("EnableInHole", false)

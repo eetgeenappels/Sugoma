@@ -23,7 +23,7 @@ import net.minecraft.world.Explosion
 import java.util.*
 import java.util.stream.Collectors
 
-class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end crystals ", Category.Combat) {
+object AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end crystals ", Category.Combat) {
     val range = SliderSetting("Range", 10f, 20f, 15f)
     val reach = SliderSetting("Reach", 3f, 5f, 3f)
     val targetingMode = ModeSetting("Targeting", arrayOf("Nearest", "Exposedness"))
@@ -48,7 +48,7 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             targetPlayers =  true,
             targetArmorStand = this.targetArmorStands.value,
             targetSortingType = this.targetingMode.currentModeIndex,
-            reach = reach.value
+            reach = range .value
         ) ?: return
         breakTime += 1
         if (crystalBreak(target)) {
@@ -105,7 +105,7 @@ class AutoCrystal : Module("AutoCrystal", "Automaticly Places and Detonates end 
             }
         }
         if (bestCrystal == null) return false
-        CombatUtil.attack(bestCrystal, lookAtCrystal.value)
+        CombatUtil.attackIgnoreDelay(bestCrystal, lookAtCrystal.value)
         return true
     }
 

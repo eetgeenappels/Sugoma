@@ -10,7 +10,7 @@ import me.eetgeenappels.sugoma.Sugoma;
 
 @Mixin(NetworkManager.class)
 public class NetworkManagerMixin {
-    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"))
+    @Inject(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At("HEAD"), cancellable = true)
     public void onPacketSend(Packet<?> packet, CallbackInfo ci) {
         if (Sugoma.Companion.getEvents().onPacket(packet)) ci.cancel();
     }

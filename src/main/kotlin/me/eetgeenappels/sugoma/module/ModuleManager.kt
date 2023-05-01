@@ -1,10 +1,6 @@
 package me.eetgeenappels.sugoma.module
 
-import me.eetgeenappels.sugoma.module.modules.combat.AutoCrystal
-import me.eetgeenappels.sugoma.module.modules.combat.AutoEZ
-import me.eetgeenappels.sugoma.module.modules.combat.AutoTotem
-import me.eetgeenappels.sugoma.module.modules.combat.KillAura
-import me.eetgeenappels.sugoma.module.modules.player.Blink
+import me.eetgeenappels.sugoma.module.modules.combat.*
 import me.eetgeenappels.sugoma.module.modules.player.NoFall
 import me.eetgeenappels.sugoma.module.modules.player.Sprint
 import me.eetgeenappels.sugoma.module.modules.render.ClickGuiModule
@@ -21,29 +17,29 @@ import kotlin.Exception
 import kotlin.RuntimeException
 import kotlin.String
 
-class ModuleManager {
-    var modules: MutableList<Module> = ArrayList()
+object ModuleManager {
+    val modules: MutableList<Module> = ArrayList()
     val clickGuiModule: ClickGuiModule
 
     init {
 
         // render
-        clickGuiModule = ClickGuiModule()
-        modules.add(Fulbright())
+        clickGuiModule = ClickGuiModule
+        modules.add(Fulbright)
         // combat
-        modules.add(KillAura())
-        modules.add(AutoTotem())
-        modules.add(AutoCrystal())
-        modules.add(AutoEZ())
+        modules.add(Criticals)
+        modules.add(KillAura)
+        modules.add(AutoTotem)
+        modules.add(AutoCrystal)
+        modules.add(AutoEZ)
         // world
-        modules.add(Scaffold())
-        modules.add(Surround())
+        modules.add(Scaffold)
+        modules.add(Surround)
         // player
-        modules.add(Sprint())
-        modules.add(NoFall())
-        modules.add(Blink())
+        modules.add(Sprint)
+        modules.add(NoFall)
 
-        // automaticly load settings from class variables
+        // automatically load settings from class variables
         for (module in modules) {
             val moduleVariables = module.javaClass.declaredFields
             for (variable in moduleVariables) {
@@ -174,6 +170,8 @@ class ModuleManager {
             // check if split[1] is "Toggled"
             if (split[1].equals("Toggled", ignoreCase = true)) {
                 module.toggled = split[2].toBoolean()
+                if (module.toggled)
+                    module.onEnable()
                 continue
             }
 

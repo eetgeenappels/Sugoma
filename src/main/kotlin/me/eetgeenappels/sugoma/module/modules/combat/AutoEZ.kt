@@ -8,7 +8,7 @@ import me.eetgeenappels.sugoma.module.modules.settings.ToggleSetting
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 
-class AutoEZ : Module(name = "AutoEZ",  description = "Automatically says EZ", category = Category.Combat) {
+object AutoEZ : Module(name = "AutoEZ",  description = "Automatically says EZ", category = Category.Combat) {
 
     val message : ModeSetting = ModeSetting("Message", arrayOf("Sugoma on Top", "EZ", "ez", "eetgeenappels is best!"))
     var onlyPlayers : ToggleSetting = ToggleSetting("OnlyPlayers", true)

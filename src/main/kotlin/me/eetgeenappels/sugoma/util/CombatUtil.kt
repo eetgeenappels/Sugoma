@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 
 object CombatUtil {
 
-    val mc: Minecraft =  Minecraft.getMinecraft();
+    val mc: Minecraft =  Minecraft.getMinecraft()
     fun findTarget(targetMobs:Boolean, targetAnimals:Boolean, targetPlayers:Boolean, targetArmorStand:Boolean, targetSortingType: Int, reach: Float) : Entity? {
 
         val entities = Minecraft.getMinecraft().world.loadedEntityList
@@ -137,6 +137,7 @@ object CombatUtil {
                     0f
                 )
             )
+            mc.player.swingArm(EnumHand.MAIN_HAND)
         } else {
             mc.player.connection.sendPacket(
                 CPacketPlayerTryUseItemOnBlock(
@@ -148,6 +149,7 @@ object CombatUtil {
                     0f
                 )
             )
+            mc.player.swingArm(EnumHand.OFF_HAND)
         }
     }
     fun attack(e: Entity, sendRotationPacket: Boolean) {
@@ -170,6 +172,27 @@ object CombatUtil {
             mc.playerController.attackEntity(mc.player, e)
             mc.player.swingArm(EnumHand.MAIN_HAND)
         }
+    }
+
+    fun attackIgnoreDelay(e: Entity, sendRotationPacket: Boolean) {
+        if (sendRotationPacket) {
+            val player = mc.player
+            val blockPos = e.position
+
+            // Calculate the angle between the player's position and the target block position
+            val dx = blockPos.x + 0.5 - player.posX
+            val dy = blockPos.y + 0.5 - (player.posY + player.getEyeHeight())
+            val dz = blockPos.z + 0.5 - player.posZ
+            val distance = sqrt(dx * dx + dy * dy + dz * dz)
+            val yaw = Math.toDegrees(atan2(dz, dx)).toFloat() - 90
+            val pitch = -Math.toDegrees(atan2(dy, distance)).toFloat()
+
+            // Send a packet to the server to update the player's rotation
+            player.connection.sendPacket(CPacketPlayer.Rotation(yaw, pitch, player.onGround))
+        }
+        mc.playerController.attackEntity(mc.player, e)
+        mc.player.swingArm(EnumHand.MAIN_HAND)
+
     }
 }
 

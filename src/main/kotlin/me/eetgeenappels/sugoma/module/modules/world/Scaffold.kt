@@ -5,7 +5,7 @@ import me.eetgeenappels.sugoma.module.Module
 import me.eetgeenappels.sugoma.util.BlockUtil
 import net.minecraft.util.math.BlockPos
 
-class Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
+object Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
     override fun onTick() {
         val playerPos = BlockPos(mc.player.posX, mc.player.posY, mc.player.posZ)
         if (BlockUtil.emptyBlocks.contains(mc.world.getBlockState(playerPos.down()).block)) {
@@ -27,7 +27,7 @@ class Scaffold : Module("Scaffold", "places blocks under you", Category.World) {
         }
     }
 
-    companion object {
+    object {
         private const val delay = 50 // The delay between block placements
     }
 }
